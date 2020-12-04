@@ -31,17 +31,20 @@ def new_game():
 
 @app.route('/api/score-word', methods=['POST'])
 def check_word():
+    """ Accepts AJAX request with JSON, {word: word-played, gameId: curr-game-id}
+        returns JSON string of { result: string-of-result-description }
+     """
+
     response = request.get_json()
     word = response['word']
     game_id = response["gameId"]
+    game = games[game_id]
 
-    is_in_word_list = games[game_id].is_word_in_word_list(word)
-    is_word_on_board = games[game_id].check_word_on_board(word)
-
-    if (is_in_word_list and is_word_on_board):
-        result = "ok"
+    if not game.is_word_in_word_list(word):
+        result = 'not-word'
+    elif not game.check_word_on_board(word):
+        result = "not-on-board"
     else:
-        # If the word is on the board, then it must not be a word.
-        result = "not-word" if is_word_on_board else "not-on-board"
+        result = 'ok'
 
     return jsonify({"result": result})

@@ -4,6 +4,8 @@ from app import app, games
 
 from boggle import BoggleGame
 
+from flask import jsonify
+
 # Make Flask errors be real errors, not HTML pages with error info
 app.config['TESTING'] = True
 
@@ -50,3 +52,29 @@ class BoggleAppTestCase(TestCase):
             # check that value in game dictionary is an instance of BoggleGame
             game_test = games[gameId_test]
             self.assertIsInstance(game_test, BoggleGame)
+
+            # set board to letters we can test
+            games[gameId_test].board = [['N', 'L', 'C', 'N', 'M'],
+                                        ['Z', 'S', 'U', 'P', 'X'],
+                                        ['T', 'C', 'A', 'P', 'C'],
+                                        ['A', 'T', 'V', 'E', 'U'],
+                                        ['U', 'K', 'O', 'U', 'E']]
+
+            test_cases = {
+                "CAP": "ok",
+                "HELLO": "not-on-board",
+                "JNFN": "not-word",
+                "123": 'not-word',
+                ' ': 'not-word',
+            }
+
+            for word, result in test_cases.items():
+
+                # not sending JSON test in insomnia
+                score_resp = client.post('/api/score-word',
+                                         data=jsonify({"word": word,
+                                                       "gameId": gameId_test}))
+     
+                score_resp_data = score_resp.get_json()
+                self.assertEqual(score_resp_data['result'], result)
+
