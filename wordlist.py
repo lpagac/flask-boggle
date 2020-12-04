@@ -37,9 +37,6 @@ class WordList:
         >>> test.check_word('Hello')
         False
 
-        >>> test.check_word(5)
-        False
-
         >>> test.check_word('')
         False
         """
