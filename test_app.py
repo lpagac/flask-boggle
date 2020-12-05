@@ -6,6 +6,8 @@ from boggle import BoggleGame
 
 from flask import jsonify
 
+import json
+
 # Make Flask errors be real errors, not HTML pages with error info
 app.config['TESTING'] = True
 
@@ -53,13 +55,22 @@ class BoggleAppTestCase(TestCase):
             game_test = games[gameId_test]
             self.assertIsInstance(game_test, BoggleGame)
 
+
+    def test_api_score_word(self):
+        """ Test making a post request to score word """
+        with self.client as client:
+            resp = client.get('/api/new-game')
+            response_data = resp.get_json()
+            gameId_test = response_data['gameId']
+
             # set board to letters we can test
             games[gameId_test].board = [['N', 'L', 'C', 'N', 'M'],
                                         ['Z', 'S', 'U', 'P', 'X'],
                                         ['T', 'C', 'A', 'P', 'C'],
                                         ['A', 'T', 'V', 'E', 'U'],
                                         ['U', 'K', 'O', 'U', 'E']]
-
+                                        
+            # set test cases and expected results
             test_cases = {
                 "CAP": "ok",
                 "HELLO": "not-on-board",
@@ -70,10 +81,11 @@ class BoggleAppTestCase(TestCase):
 
             for word, result in test_cases.items():
 
-                # not sending JSON test in insomnia
-                score_resp = client.post('/api/score-word',
-                                         data=jsonify({"word": word,
-                                                       "gameId": gameId_test}))
+                score_resp = client.post(
+                    '/api/score-word',
+                    data=json.dumps({"word": word,
+                                  "gameId": gameId_test}),
+                    content_type="application/json")
      
                 score_resp_data = score_resp.get_json()
                 self.assertEqual(score_resp_data['result'], result)

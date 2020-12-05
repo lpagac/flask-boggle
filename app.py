@@ -36,7 +36,7 @@ def check_word():
      """
 
     response = request.get_json()
-    word = response['word']
+    word = response["word"]
     game_id = response["gameId"]
     game = games[game_id]
 
